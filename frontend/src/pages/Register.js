@@ -29,7 +29,7 @@ function Register() {
     try {
       const response = await signup(formData);
       console.log(response.data);
-      navigate("/login");
+      navigate("/");
     } catch (error) {
       setError(error.response?.data?.message || "Username already exists");
       console.error("Signup error:", error);
