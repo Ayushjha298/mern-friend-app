@@ -19,7 +19,7 @@ function Register() {
       console.log(response.data);
       navigate("/home");
     } catch (error) {
-      setError(error.response?.data?.message || "Signup failed");
+      setError(error.response?.data?.message || "Username already Exists");
       console.error("Signup error:", error);
     }
   };
