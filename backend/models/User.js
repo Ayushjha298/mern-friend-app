@@ -11,7 +11,8 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    interests: [{ type: String, trim: true }],
 });
 
 const User = mongoose.model('User', userSchema);

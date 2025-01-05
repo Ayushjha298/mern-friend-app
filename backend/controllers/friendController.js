@@ -94,12 +94,13 @@ exports.getFriendRecommendations = async (req, res) => {
     try {
         const userId = req.user.id;
 
-        const user = await User.findById(userId).populate('friends', 'friends');
+ 
+        const user = await User.findById(userId).populate('friends', 'friends interests');
         if (!user) return res.status(404).json({ error: 'User not found' });
 
         const friendIds = user.friends.map((friend) => friend._id.toString());
-        const potentialFriends = new Set();
 
+        const potentialFriends = new Set();
         for (const friend of user.friends) {
             for (const potential of friend.friends) {
                 if (
@@ -111,11 +112,35 @@ exports.getFriendRecommendations = async (req, res) => {
             }
         }
 
+        const interestBasedUsers = await User.find({
+            _id: { $nin: [...friendIds, userId] }, 
+            interests: { $in: user.interests },
+        }).select('username interests');
+
+
+        const combinedRecommendations = Array.from(new Set([
+            ...Array.from(potentialFriends),
+            ...interestBasedUsers.map((user) => user._id.toString()),
+        ]));
+
+ 
         const recommendedUsers = await User.find({
-            _id: { $in: Array.from(potentialFriends) },
-        }).select('username');
+            _id: { $in: combinedRecommendations },
+        }).select('username interests');
 
         res.json(recommendedUsers);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
+exports.updateInterests = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { interests } = req.body;
+
+        const user = await User.findByIdAndUpdate(userId, { interests }, { new: true });
+        res.json(user);
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
